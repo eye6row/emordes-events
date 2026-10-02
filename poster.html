@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="icon" href="wordmark.png"><title>Venue Poster / Emordes</title></head><body>
+<main class="wrap"><div class="noprint actions" style="margin-bottom:16px"><select id="sel" style="background:#000;color:#fff;border:1px solid #fff;padding:12px;font:inherit" aria-label="Event"></select><button class="red" onclick="print()">Print poster</button></div>
+<div class="poster" id="p"></div></main>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script> <script src="events.js"></script><script src="common.js"></script><script>header("");
+const id=qp("id")||EVENTS[0].id;$("#sel").innerHTML=EVENTS.map(e=>`<option value="${e.id}"${e.id===id?" selected":""}>${esc(e.title)}</option>`).join("");
+$("#sel").onchange=ev=>location.search="?id="+ev.target.value;
+const e=getEvent(id)||EVENTS[0];const url=new URL("live.html?id="+e.id,location.href).href;
+$("#p").innerHTML=`<img class="wm" src="wordmark.png" alt="Emordes"><p class="meta">${fmtDate(e.date)} / ${esc(e.venue)}</p><h1 style="font-size:clamp(36px,7vw,80px)">${esc(e.title)}</h1>
+<div class="qrbox"><img src="${qrImg(url,10)}" alt="QR to live event page"></div>
+<h2 style="color:#fff">Scan for</h2><p class="meta" style="font-size:13px;color:#fff">Schedule / Credits / Menu / Wi-Fi / Tips</p><p class="meta">${esc(url)}</p>`;
+</script></body></html>

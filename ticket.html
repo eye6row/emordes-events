@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="icon" href="wordmark.png"><title>Ticket / Emordes</title></head><body>
+<main class="wrap" id="m"></main>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script> <script src="events.js"></script><script src="common.js"></script><script>header("tickets.html");
+const id=qp("t");let k=store.get("emordes_tickets").find(x=>x.id===id);
+if(!k&&qp("d")){try{k=JSON.parse(decodeURIComponent(escape(atob(qp("d")))));}catch{}}
+if(!k){$("#m").innerHTML='<p>Ticket not found on this device. <a href="tickets.html">My tickets</a></p>'}else{
+const e=getEvent(k.event)||{};const payload=["EMD1",k.id,k.event,k.tier,k.name].join("|");
+$("#m").innerHTML=`<div class="ticket"><div class="head"><img class="wm" src="wordmark.png" alt="Emordes"><span class="meta">Admit one / ${esc(k.tier)}</span><h2>${esc(e.title)}</h2><span class="meta">${e.date?fmtDate(e.date):""} / ${esc(e.time)}<br>${esc(e.venue)}, ${esc(e.address)}</span></div>
+<div class="qr"><img id="qr" alt="Ticket QR code" src="${qrImg(payload,8)}"></div>
+<div class="foot"><span class="meta">Holder<b>${esc(k.name)}</b></span><span class="meta">Ticket ID<b>${k.id}</b></span></div></div>
+<div class="actions noprint"><button class="red" id="save">Save image</button><button onclick="print()">Print</button><a class="btn" href="live.html?id=${k.event}">Event page</a></div>`;
+$("#save").onclick=async()=>{await document.fonts.ready;const c=document.createElement("canvas"),W=720,H=1100;c.width=W;c.height=H;const x=c.getContext("2d");
+ x.fillStyle="#000";x.fillRect(0,0,W,H);x.strokeStyle="#fff";x.lineWidth=2;x.strokeRect(20,20,W-40,H-40);
+ const wm=new Image();wm.src="wordmark.png";await wm.decode().catch(()=>{});if(wm.width){const h=50,w=wm.width*h/wm.height;x.drawImage(wm,50,55,w,h)}
+ x.fillStyle="#8a8a8a";x.font="500 18px 'JetBrains Mono'";x.fillText(("ADMIT ONE / "+k.tier).toUpperCase(),50,150);
+ x.font="700 46px Oswald";let y;
+ // simple wrap
+ x.fillStyle="#D64541";y=210;let line="";for(const w of (e.title||"").toUpperCase().split(" ")){if(x.measureText(line+w).width>W-100){x.fillText(line,50,y);y+=52;line=""}line+=w+" "}x.fillText(line,50,y);
+ x.fillStyle="#bbb";x.font="18px 'JetBrains Mono'";x.fillText(((e.date?fmtDate(e.date):"")+" / "+(e.time||"")).toUpperCase(),50,y+44);x.fillText((e.venue+", "+e.address).toUpperCase(),50,y+72);
+ x.fillStyle="#fff";x.fillRect(150,y+110,420,420);const q=new Image();q.src=$("#qr").src;await q.decode();x.imageSmoothingEnabled=false;x.drawImage(q,170,y+130,380,380);
+ x.fillStyle="#8a8a8a";x.font="16px 'JetBrains Mono'";x.fillText("HOLDER",50,H-110);x.fillText("TICKET ID",380,H-110);x.fillStyle="#fff";x.font="22px 'JetBrains Mono'";x.fillText(k.name.slice(0,22),50,H-78);x.fillText(k.id,380,H-78);
+ const a=document.createElement("a");a.download=k.id+".png";a.href=c.toDataURL("image/png");a.click();};
+}
+</script></body></html>

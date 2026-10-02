@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="icon" href="wordmark.png"><title>Emordes Events</title></head><body>
+<section class="hero"><p class="meta">Emordes Studio / Events &amp; Tickets</p><h1>Events</h1><p>Gatherings, open studios and performance nights from the house of Emordes. Tickets are delivered to your phone. Show the QR at the door.</p></section>
+<main class="wrap"><div class="grid" id="grid"></div>
+<p class="meta" style="margin-top:24px">Private events + inquiries: <a href="mailto:jh@emordes.studio">jh@emordes.studio</a></p></main>
+<script src="events.js"></script><script src="common.js"></script><script>
+header("index.html");
+$("#grid").innerHTML = EVENTS.map((e,i)=>{const lo=Math.min(...e.tiers.map(t=>t.price));return `<a class="card rise" href="event.html?id=${e.id}">
+<div class="img">${imgBlock(e.image)}</div><div class="body">
+<div class="row"><span class="meta">${esc(e.kicker)}</span><span class="num">0${i+1}</span></div>
+<h2>${esc(e.title)}</h2>
+<div class="row"><span class="meta">${fmtDate(e.date)} / ${esc(e.address)}</span></div>
+<div class="row"><span>${lo===0?"Free":"From "+money(lo)}</span>${e.placeholder?'<span class="ph">Placeholder</span>':''}</div></div></a>`}).join("");
+</script></body></html>

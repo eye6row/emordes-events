@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="icon" href="wordmark.png"><title>My Tickets / Emordes</title></head><body>
+<main class="wrap narrow"><p class="meta">Saved on this device</p><h1>My Tickets</h1><div style="height:20px"></div><div class="list" id="l"></div>
+<p class="meta" style="margin-top:16px">Tip: open a ticket and tap Save image so you have it offline.</p></main>
+<script src="events.js"></script><script src="common.js"></script><script>header("tickets.html");
+const t=store.get("emordes_tickets").slice().reverse();
+$("#l").innerHTML=t.length?t.map(k=>{const e=getEvent(k.event)||{title:k.event,date:""};return `<a href="ticket.html?t=${k.id}"><span><b style="font-family:var(--head);text-transform:uppercase;font-size:16px">${esc(e.title)}</b><br><span class="meta">${esc(k.tier)} / ${esc(k.name)}</span></span><span class="meta">${e.date?fmtDate(e.date):""}<br>${k.id}</span></a>`}).join(""):'<div class="r">No tickets yet. <a href="index.html">See events</a></div>';
+</script></body></html>

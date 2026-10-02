@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="icon" href="wordmark.png"><title>Door Check-in / Emordes</title></head><body>
+<main class="wrap narrow"><p class="meta">Staff only / door scanner</p><h1>Check-in</h1><div style="height:16px"></div>
+<div id="reader"></div><div style="height:12px"></div>
+<div class="actions"><button class="red" id="start">Start camera</button><button id="stop">Stop</button></div>
+<div style="height:16px"></div><div class="verdict" id="v" aria-live="assertive"></div><p id="vd" class="meta" style="text-align:center"></p>
+<form id="man" style="display:flex;gap:6px;margin:18px 0"><input id="mid" placeholder="Manual ticket ID e.g. EMD-1A2B3C" aria-label="Ticket ID"><button>Check</button></form>
+<div style="display:flex;justify-content:space-between;align-items:end"><h3>Log <span id="cnt" class="meta"></span></h3><button id="clr">Clear log</button></div><div style="height:8px"></div><div class="list" id="log"></div>
+<p class="meta" style="margin-top:16px;line-height:1.6">Log is stored on this device only. Use one door phone per event. Fraud-proof validation needs a backend (phase 2).</p></main>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="events.js"></script><script src="common.js"></script><script>header("checkin.html");
+let sc,last="",lastT=0;
+function check(raw){
+ raw=raw.trim();let id=raw,ev="",name="",tier="";
+ if(raw.startsWith("EMD1|")){[, id, ev, tier, name]=raw.split("|")}
+ else{const k=store.get("emordes_tickets").find(x=>x.id.toUpperCase()===raw.toUpperCase());if(k){id=k.id;ev=k.event;name=k.name;tier=k.tier}}
+ const v=$("#v");const log=store.get("emordes_checkins");
+ if(!/^EMD-[0-9A-Z]{4,}$/i.test(id)){v.className="verdict bad";v.textContent="INVALID";$("#vd").textContent=raw.slice(0,60);return}
+ id=id.toUpperCase();const prev=log.find(x=>x.id===id);
+ if(prev){v.className="verdict dup";v.textContent="ALREADY SCANNED";$("#vd").textContent=id+" / first at "+new Date(prev.at).toLocaleTimeString()}
+ else{log.push({id,ev,name,tier,at:Date.now()});store.set("emordes_checkins",log);v.className="verdict ok";v.textContent="VALID";const e=getEvent(ev);$("#vd").textContent=[name,tier,e&&e.title,id].filter(Boolean).join(" / ")}
+ navigator.vibrate&&navigator.vibrate(prev?[80,60,80]:60);renderLog();
+}
+function renderLog(){const l=store.get("emordes_checkins").slice().reverse();$("#cnt").textContent="("+l.length+")";
+ $("#log").innerHTML=l.length?l.map(x=>`<div class="r"><span>${esc(x.name||"Guest")}<br><span class="meta">${esc(x.tier||"")} ${x.id}</span></span><span class="meta">${new Date(x.at).toLocaleTimeString()}</span></div>`).join(""):'<div class="r meta">No check-ins yet</div>'}
+renderLog();
+$("#start").onclick=async()=>{if(sc)return;sc=new Html5Qrcode("reader");try{await sc.start({facingMode:"environment"},{fps:10,qrbox:240},t=>{if(t===last&&Date.now()-lastT<3000)return;last=t;lastT=Date.now();check(t)})}catch(err){alert("Camera unavailable: "+err);sc=null}};
+$("#stop").onclick=async()=>{if(sc){await sc.stop();sc.clear();sc=null}};
+$("#man").onsubmit=ev=>{ev.preventDefault();if($("#mid").value)check($("#mid").value);$("#mid").value=""};
+$("#clr").onclick=()=>{if(confirm("Clear all check-ins on this device?")){store.set("emordes_checkins",[]);renderLog()}};
+</script></body></html>

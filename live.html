@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="icon" href="wordmark.png"><title>Live / Emordes</title></head><body>
+<main class="wrap narrow" id="m"></main>
+<script src="events.js"></script><script src="common.js"></script><script>header("");
+const e=getEvent(qp("id"))||EVENTS[0],L=e.live||{},T=SITE.tips;document.title=e.title+" / Live";
+const rows=a=>`<div class="rows">${(a||[]).map(([k,v])=>`<div><span>${esc(k)}</span><span style="text-align:right">${esc(v)}</span></div>`).join("")}</div>`;
+$("#m").innerHTML=`<p class="meta">Live now / ${fmtDate(e.date)} ${e.placeholder?'<span class="ph">Placeholder</span>':''}</p><h1 style="font-size:clamp(40px,12vw,84px)">${esc(e.title)}</h1><p class="meta" style="margin-top:8px">${esc(e.venue)}, ${esc(e.address)}</p>
+<div style="height:16px"></div>
+<section class="live-sec"><h2>Running order</h2>${rows(L.schedule)}</section>
+<section class="live-sec"><h2>Credits</h2>${rows(L.credits)}</section>
+<section class="live-sec"><h2>Menu</h2>${rows(L.menu)}</section>
+<section class="live-sec"><h2>Wi-Fi</h2>${rows([["Network",L.wifi?.network],["Password",L.wifi?.password]])}</section>
+<section class="live-sec"><h2>Tag us</h2><a class="btn" href="https://instagram.com/${esc(SITE.instagram)}" target="_blank" rel="noopener">@${esc(SITE.instagram)} ↗</a></section>
+<section class="live-sec" id="tip"><h2>Tip the team</h2><p class="meta">Pick an amount, then a method</p>
+<div class="amts">${[5,10,20].map(a=>`<button data-a="${a}">$${a}</button>`).join("")}<button data-a="c">Custom</button></div>
+<input id="cust" type="number" min="1" inputmode="decimal" placeholder="Custom amount ($)" style="display:none" aria-label="Custom tip amount">
+<div class="pay"><button class="red" data-p="venmo">Venmo</button><button class="red" data-p="cashapp">Cash App</button><button class="red" data-p="stripe">Card</button></div></section>
+<p class="meta" style="padding:20px 0">Emordes Studio / <a href="mailto:jh@emordes.studio">jh@emordes.studio</a></p>`;
+let amt=10;document.querySelector('[data-a="10"]').classList.add("on");
+$(".amts").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;document.querySelectorAll(".amts button").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+ if(b.dataset.a==="c"){$("#cust").style.display="block";$("#cust").focus();amt=null}else{$("#cust").style.display="none";amt=+b.dataset.a}};
+$(".pay").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;const a=amt||+$("#cust").value;if(!a||a<1){alert("Enter an amount");return}
+ const p=b.dataset.p,note=encodeURIComponent("Tip / "+e.title);
+ if(p==="venmo"){if(!T.venmo)return alert("Venmo not set up yet");location.href=`https://venmo.com/${T.venmo}?txn=pay&amount=${a}&note=${note}`}
+ if(p==="cashapp"){if(!T.cashapp)return alert("Cash App not set up yet");location.href=`https://cash.app/$${T.cashapp}/${a}`}
+ if(p==="stripe"){if(!T.stripeTipLink)return alert("Card tips not set up yet");location.href=T.stripeTipLink}};
+</script></body></html>
