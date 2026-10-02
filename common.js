@@ -11,7 +11,7 @@ const store = {
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v))
 };
 function header(active) {
-  const links = [["index.html", "Events"], ["tickets.html", "My Tickets"], ["checkin.html", "Door"]];
+  const links = [["index.html", "Events"], ["tickets.html", "My Tickets"], ["checkin.html", "Door"], ["checklist.html", "Checklist"]];
   document.body.insertAdjacentHTML("afterbegin", `<header class="top"><a href="index.html" aria-label="Emordes Events home"><img src="wordmark.png" alt="Emordes"></a><nav>${links.map(([h, t]) => `<a href="${h}"${h === active ? ' aria-current="page"' : ""}>${t}</a>`).join("")}</nav></header>`);
 }
 function qrImg(text, cell = 6) {

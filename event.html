@@ -15,7 +15,7 @@ $("#m").innerHTML=`<section class="detail"><div class="img">${imgBlock(e.image)}
 <div><h3>Tickets</h3><div id="tiers"></div></div>
 <div class="total"><span>Total</span><span id="tot"></span></div>
 <button class="red" id="buy">Buy tickets</button>
-<p class="meta">Questions: <a href="mailto:jh@emordes.studio">jh@emordes.studio</a> / <a href="live.html?id=${e.id}">Event-day page</a></p></div></section>`;
+<p class="meta">Questions: <a href="mailto:jh@emordes.studio">jh@emordes.studio</a> / <a href="live.html?id=${e.id}">Event-day page</a> / <a href="checklist.html?id=${e.id}">Checklist</a></p></div></section>`;
 function render(){
  $("#tiers").innerHTML=e.tiers.map((t,i)=>`<div class="tier"><div><b style="font-family:var(--head);font-size:16px;text-transform:uppercase">${esc(t.name)}</b> <span>${money(t.price)}</span><div class="meta">${esc(t.note)}</div></div>
  <div class="qty"><button aria-label="less" data-i="${i}" data-d="-1">−</button><span>${q[i]}</span><button aria-label="more" data-i="${i}" data-d="1">+</button></div></div>`).join("");

@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="icon" href="wordmark.png"><title>Checklist / Emordes</title></head><body>
+<main class="wrap narrow ck-page" id="m"></main>
+<script src="events.js"></script><script src="common.js"></script><script>
+header("checklist.html");
+const PH=[["pre","Pre-Event",["Contract executed","Scope locked","Budget approved","Master production schedule","Critical path","Vendor contracts","COIs","Load-in schedule","Labor call","Freight / drayage"]],
+["during","During Event",["Doors","Registration live","VIP arrival","Executive arrival","Talent arrival","Green room","Holding","Stage ready","AV live","Lighting cues","Video cues","Music cues","Speaker cues"]],
+["post","Post-Event",["Guest departure","VIP departure","Talent departure","Transportation","Gift distribution","Lost & found","Strike","Load-out","Rental returns","Inventory reconciliation"]]];
+const e=getEvent(qp("id"))||EVENTS[0];document.title="Checklist / "+e.title+" / Emordes";
+const KEY="emordes_checklist_"+e.id;
+const fresh=()=>{const o={};PH.forEach(([k,,its])=>o[k]=its.map((n,i)=>({id:k+i,name:n,done:false,note:"",owner:""})));return o};
+let st;try{st=JSON.parse(localStorage.getItem(KEY))}catch{}if(!st||!st.pre)st=fresh();
+const save=()=>localStorage.setItem(KEY,JSON.stringify(st));const open=new Set();
+const pct=a=>a.length?Math.round(a.filter(x=>x.done).length/a.length*100):0;
+function render(){const all=PH.flatMap(([k])=>st[k]);
+$("#m").innerHTML=`<div style="display:grid;gap:14px;padding:12px 0 24px">
+<p class="meta">Production checklist ${e.placeholder?'<span class="ph">Placeholder</span>':''}</p>
+<h1 style="font-size:clamp(36px,7vw,72px)">${esc(e.title)}</h1><p class="meta">${fmtDate(e.date)} / ${esc(e.venue)}</p>
+<select class="ck-sel noprint" id="ev" aria-label="Event">${EVENTS.map(x=>`<option value="${esc(x.id)}"${x.id===e.id?" selected":""}>${esc(x.title)}</option>`).join("")}</select>
+<div class="total"><span>Overall</span><span>${all.filter(x=>x.done).length}/${all.length} · ${pct(all)}%</span></div><div class="bar"><i style="width:${pct(all)}%"></i></div>
+<div class="actions noprint" style="justify-content:flex-start"><button id="pr">Print</button><button id="rs">Reset</button><a class="btn" href="event.html?id=${esc(e.id)}">Event page</a></div></div>
+${PH.map(([k,t])=>{const a=st[k];return `<section class="ck-phase"><div class="ck-ph-h"><h2>${t}</h2><span class="meta">${a.filter(x=>x.done).length}/${a.length} · ${pct(a)}%</span></div><div class="bar"><i style="width:${pct(a)}%"></i></div>
+<div>${a.map(it=>`<div class="ck-item${it.done?" done":""}${open.has(it.id)?" open":""}" data-p="${k}" data-id="${it.id}">
+<button class="ck-box" data-a="t" aria-pressed="${it.done}" aria-label="Toggle ${esc(it.name)}">${it.done?"✓":""}</button>
+<span class="ck-name" data-a="t">${esc(it.name)}</span>
+<span class="ck-tools"><button data-a="o" aria-label="Note and owner">${it.note||it.owner?"Edit":"Note"}</button>${it.custom?`<button data-a="d" aria-label="Delete">✕</button>`:""}</span>
+${it.note||it.owner?`<span class="ck-sum">${it.owner?"@"+esc(it.owner)+" ":""}${esc(it.note)}</span>`:""}
+<div class="ck-extra"><input data-f="owner" placeholder="Owner" maxlength="40" value="${esc(it.owner)}"><input data-f="note" placeholder="Note" maxlength="200" value="${esc(it.note)}"></div></div>`).join("")}</div>
+<form class="ck-add" data-p="${k}"><input placeholder="Add item" maxlength="80" aria-label="Add item to ${t}"><button type="submit">Add</button></form></section>`}).join("")}`;}
+render();
+const find=el=>{const r=el.closest(".ck-item");return r&&st[r.dataset.p].find(x=>x.id===r.dataset.id)};
+$("#m").addEventListener("click",ev=>{const t=ev.target;
+ if(t.id==="pr")return print();
+ if(t.id==="rs"){if(confirm("Reset this checklist? Checks, notes and custom items will be cleared.")){st=fresh();save();render()}return}
+ const a=t.dataset.a;if(!a)return;const it=find(t);if(!it)return;const r=t.closest(".ck-item");
+ if(a==="t"){it.done=!it.done;save();render()}
+ if(a==="o"){open.has(it.id)?open.delete(it.id):open.add(it.id);render();if(open.has(it.id))$(`.ck-item[data-id="${it.id}"] input`).focus()}
+ if(a==="d"){st[r.dataset.p]=st[r.dataset.p].filter(x=>x!==it);save();render()}});
+$("#m").addEventListener("change",ev=>{const t=ev.target;
+ if(t.id==="ev")return location.href="checklist.html?id="+encodeURIComponent(t.value);
+ if(t.dataset.f){const it=find(t);it[t.dataset.f]=t.value.trim();save();render()}});
+$("#m").addEventListener("submit",ev=>{ev.preventDefault();const f=ev.target,v=f.querySelector("input").value.trim();if(!v)return;
+ st[f.dataset.p].push({id:"c"+Date.now(),name:v,done:false,note:"",owner:"",custom:true});save();render();$(`form[data-p="${f.dataset.p}"] input`).focus()});
+</script></body></html>
